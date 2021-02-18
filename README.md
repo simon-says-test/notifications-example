@@ -1,6 +1,6 @@
 # Notifications Microservice - Scenario
 
-The Notifications microservice manages user notifications. It responds to system wide events and depending on the type of event it will generate a new user notification and store it in its store. 
+The Notifications service manages user notifications for system events. To do this, it receives system events and depending on the type of event it will generate a new user notification and store it in its store.
 
 When a user logs in, the user will fetch all of their notifications.
 
@@ -9,7 +9,15 @@ When a user logs in, the user will fetch all of their notifications.
 ## Appointment cancelled notification 
 
 ### Requirements:
-The notification service listens for the ‘Appointment Cancelled’ event and on receiving the event the service will create a new notification model and store it in the notifications database. Event data includes:
+The notification service must accept ‘Appointment Cancelled’ events (received via HTTP).
+On receiving this type of event the service will create a new notification model and store it in the notifications database.
+All incoming Events will have the following basic structure:
+```
+ Type
+ Data
+ UserId
+```
+For ‘Appointment Cancelled’ events (specifically), the **Data** attribute will include:
 ```
 - FirstName 
 - AppointmentDateTime
@@ -17,7 +25,7 @@ The notification service listens for the ‘Appointment Cancelled’ event and o
 - Reason
 ```
 
-The notification service stores a predefined notification template associated to the Appointment Cancelled event. On generating a new notification, the notificaiton template is retrieved from the store, it’s notification body is interpolated with the event data, and stored with the user id.
+The notification service stores a predefined notification template associated to the Appointment Cancelled event. On generating a new notification, the notificaiton template is retrieved from the store, the notification body is interpolated with the event data, and then stored with the user id.
 The notification service can return back notifications for a given user id.
 
 ---
@@ -38,12 +46,7 @@ The notification service can return back notifications for a given user id.
     Title: ‘Appointment Cancelled’
     ```
 
-5. Add an API for the notification service to receive events. Events should include the following properties:
-    ```
-    Type
-    Data
-    UserId
-    ```
+5. Add an API for the notification service to receive events (using the event structure defined above).    
 
 6. Handle new events:
     - Read template from store based on EventType
