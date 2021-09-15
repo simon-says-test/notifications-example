@@ -7,6 +7,8 @@ namespace Notifications.Common.Interfaces
 {
     public interface INotificationsService
     {
-        IReadOnlyCollection<NotificationModel> GetAllNotifications();
+        IReadOnlyCollection<NotificationModel> GetNotifications(int? userId);
+
+        NotificationModel CreateNotification(EventModel eventModel);
     }
 }

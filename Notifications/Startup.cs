@@ -41,7 +41,7 @@ namespace Notifications
 
             var connection = @"Server=.;Database=notifications-db;Trusted_Connection=True;ConnectRetryCount=0";
             services.AddDbContext<NotificationsDbContext>
-                (options => options.UseSqlServer(connection));
+                (options => options.UseSqlServer(Configuration.GetConnectionString("NotificationsContext")));
 
             services.AddTransient<INotificationsAccess, NotificationsAccess>();
             services.AddTransient<INotificationsService, NotificationsService>();
@@ -67,7 +67,7 @@ namespace Notifications
             }
 
             app.UseHttpsRedirection();
-            
+
             app.UseRouting();
             app.UseEndpoints(endpoints =>
             {

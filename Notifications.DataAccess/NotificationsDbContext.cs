@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
+using Notifications.Common.Enums;
 using Notifications.DataAccess.Entities;
 
 namespace Notifications.DataAccess
@@ -18,6 +19,14 @@ namespace Notifications.DataAccess
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<TemplateEntity>().HasData(
+                new TemplateEntity {
+                    Id = Guid.NewGuid(),
+                    EventType = EventType.AppointmentCancelled,
+                    Body = "Hi {FirstName}, your appointment with {OrganisationName} at {AppointmentDateTime} has been - cancelled for the following reason: {Reason}.",
+                    Title = "Appointment Cancelled"
+                });
         }
     }
 }

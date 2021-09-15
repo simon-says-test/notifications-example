@@ -1,13 +1,13 @@
 using Notifications.Common.Enums;
 using System;
 
-namespace Notifications.DataAccess.Entities
+namespace Notifications.Common.Models
 {
-    public class TemplateEntity
+    public class TemplateModel
     {
         public Guid Id { get; set; }
 
-        public EventType EventType { get; set; }
+        public string EventType { get; set; }
 
         public string Body { get; set; }
 

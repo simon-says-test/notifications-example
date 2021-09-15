@@ -22,9 +22,16 @@ namespace Notifications.Controllers
 
         [Route("")]
         [HttpGet]
-        public IReadOnlyCollection<NotificationModel> Get()
+        public IReadOnlyCollection<NotificationModel> Get(int? userId = null)
         {
-            return _notificationsService.GetAllNotifications();
+            return _notificationsService.GetNotifications(userId);
+        }
+
+        [Route("")]
+        [HttpPost]
+        public NotificationModel Post(EventModel eventModel)
+        {
+            return _notificationsService.CreateNotification(eventModel);
         }
     }
 }
