@@ -4,9 +4,6 @@ using Notifications.Common.Interfaces;
 using Notifications.Common.Models;
 using Notifications.Services;
 using System;
-using Microsoft.Extensions.Configuration;
-using Microsoft.EntityFrameworkCore;
-using Notifications.DataAccess;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -14,17 +11,6 @@ namespace Notifications.Tests
 {
     public class NotificationsServiceTests
     {
-        private readonly DbContextOptionsBuilder<NotificationsDbContext> builder;
-        private readonly NotificationsDbContext context;
-
-        public NotificationsServiceTests()
-        {
-            builder = new DbContextOptionsBuilder<NotificationsDbContext>().UseSqlServer(Startup.Configuration().GetConnectionString("NotificationsContext"));
-            context = new NotificationsDbContext(builder.Options);
-            context.Notifications.RemoveRange(context.Notifications);
-            context.SaveChanges();
-        }
-
         [Fact]
         public void CreateNotification()
         {
