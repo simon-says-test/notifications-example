@@ -6,7 +6,6 @@ namespace Notifications.Tests
     {
         public NotificationsAccessTests()
         {
-         
         }
 
         [Fact]

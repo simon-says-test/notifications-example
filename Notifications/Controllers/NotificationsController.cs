@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -24,14 +25,34 @@ namespace Notifications.Controllers
         [HttpGet]
         public IReadOnlyCollection<NotificationModel> Get(int? userId = null)
         {
-            return _notificationsService.GetNotifications(userId);
+            try
+            {
+                return _notificationsService.GetNotifications(userId);
+            }
+            catch
+            {
+                // Anything else is a problem 
+                Response.StatusCode = StatusCodes.Status500InternalServerError;
+                return null;
+            }
         }
 
         [Route("")]
         [HttpPost]
-        public NotificationModel Post(EventModel eventModel)
+        public ActionResult Post(EventModel eventModel)
         {
-            return _notificationsService.CreateNotification(eventModel);
+            try
+            {
+                return Ok(_notificationsService.CreateNotification(eventModel));
+            }
+            catch (Exception ex) when (ex is ArgumentException)
+            {
+                return BadRequest(ex.Message);  // Inform consumer of bad request data
+            }
+            catch
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
         }
     }
 }

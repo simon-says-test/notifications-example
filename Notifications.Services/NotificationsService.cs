@@ -18,7 +18,7 @@ namespace Notifications.Services
 
         public IReadOnlyCollection<NotificationModel> GetNotifications(int? userId)
         {
-            return userId == null 
+            return userId == null
                 ? this.notificationsAccess.GetAllNotifications().ToList()
                 : this.notificationsAccess.GetNotificationsForUser(userId.Value).ToList();
         }

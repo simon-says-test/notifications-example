@@ -37,20 +37,23 @@ namespace Notifications.DataAccess.Access
 
         public IEnumerable<NotificationModel> GetAllNotifications()
         {
-            return dbContext.Notifications.Select(x => new NotificationModel()
-            {
-                Id = x.Id,
-                EventType = x.EventType.ToString(),
-                Title = x.Title,
-                Body = x.Body,
-                UserId = x.UserId
-            });
+            return dbContext.Notifications
+                .OrderBy(x => x.Id)
+                .Select(x => new NotificationModel()
+                {
+                    Id = x.Id,
+                    EventType = x.EventType.ToString(),
+                    Title = x.Title,
+                    Body = x.Body,
+                    UserId = x.UserId
+                });
         }
 
         public IEnumerable<NotificationModel> GetNotificationsForUser(int userId)
         {
             return dbContext.Notifications
                 .Where(x => x.UserId == userId)
+                .OrderBy(x => x.Id)
                 .Select(x => new NotificationModel()
                 {
                     Id = x.Id,
@@ -77,16 +80,9 @@ namespace Notifications.DataAccess.Access
                     Title = template.Title
                 };
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is ArgumentNullException || ex is ArgumentException || ex is OverflowException || ex is InvalidOperationException)
             {
-                if (ex is ArgumentNullException || ex is ArgumentException || ex is OverflowException || ex is InvalidOperationException)
-                {
-                    throw new ArgumentException($"The requested Event Type ({0}) was not found.", data.Type);
-                }
-                else
-                {
-                    throw;
-                }
+                throw new ArgumentException($"The requested Event Type ({0}) was not found.", data.Type);
             }
         }
     }

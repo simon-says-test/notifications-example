@@ -21,7 +21,8 @@ namespace Notifications.DataAccess
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<TemplateEntity>().HasData(
-                new TemplateEntity {
+                new TemplateEntity
+                {
                     Id = Guid.NewGuid(),
                     EventType = EventType.AppointmentCancelled,
                     Body = "Hi {FirstName}, your appointment with {OrganisationName} at {AppointmentDateTime} has been - cancelled for the following reason: {Reason}.",

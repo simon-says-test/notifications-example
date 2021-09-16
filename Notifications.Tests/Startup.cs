@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -19,28 +20,27 @@ using Notifications.DataAccess.Access;
 using Notifications.Services;
 using Swashbuckle.AspNetCore.Swagger;
 
-namespace Notifications
+namespace Notifications.Tests
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public static IConfiguration Configuration()
         {
-            Configuration = configuration;
+            var config = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json")
+                .Build();
+            return config;
         }
-
-        public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc();
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
-            });
+            services.AddControllers()
+                .AddApplicationPart(Assembly.Load("Notifications"))
+                .AddControllersAsServices();
 
             services.AddDbContext<NotificationsDbContext>
-                (options => options.UseSqlServer(Configuration.GetConnectionString("NotificationsContext")));
+                (options => options.UseSqlServer(Configuration().GetConnectionString("NotificationsContext")));
 
             services.AddTransient<INotificationsAccess, NotificationsAccess>();
             services.AddTransient<INotificationsService, NotificationsService>();
@@ -49,24 +49,6 @@ namespace Notifications
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            app.UseSwagger();
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
-            });
-
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-            else
-            {
-                app.UseExceptionHandler("/Error");
-                app.UseHsts();
-            }
-
-            app.UseHttpsRedirection();
-
             app.UseRouting();
             app.UseEndpoints(endpoints =>
             {
