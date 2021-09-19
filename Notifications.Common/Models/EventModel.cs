@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.Tracing;
-using System.Text;
-
-namespace Notifications.Common.Models
+﻿namespace Notifications.Common.Models
 {
     public class EventModel
     {

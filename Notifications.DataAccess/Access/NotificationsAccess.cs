@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Text;
 using Notifications.Common.Enums;
+using Notifications.Common.Fields;
 using Notifications.Common.Interfaces;
 using Notifications.Common.Models;
 using Notifications.DataAccess.Entities;
@@ -24,14 +23,7 @@ namespace Notifications.DataAccess.Access
             EventType eventType = (EventType)Enum.Parse(typeof(EventType), notification.EventType, true);
 
             dbContext.Notifications.Add(
-                new NotificationEntity
-                {
-                    Id = notification.Id,
-                    EventType = eventType,
-                    Title = notification.Title,
-                    Body = notification.Body,
-                    UserId = notification.UserId
-                });
+                new NotificationEntity(notification.Id, eventType, notification.Body, notification.Title, notification.UserId));
             dbContext.SaveChanges();
         }
 
@@ -43,8 +35,8 @@ namespace Notifications.DataAccess.Access
                 {
                     Id = x.Id,
                     EventType = x.EventType.ToString(),
-                    Title = x.Title,
-                    Body = x.Body,
+                    Title = (EventTitle)x.Title,
+                    Body = (EventBody)x.Body,
                     UserId = x.UserId
                 });
         }
@@ -58,8 +50,8 @@ namespace Notifications.DataAccess.Access
                 {
                     Id = x.Id,
                     EventType = x.EventType.ToString(),
-                    Title = x.Title,
-                    Body = x.Body,
+                    Title = (EventTitle)x.Title,
+                    Body = (EventBody)x.Body,
                     UserId = x.UserId
                 });
         }

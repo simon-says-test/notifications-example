@@ -1,17 +1,22 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28010.2041
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31702.278
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Notifications", "Notifications\Notifications.csproj", "{648BA88D-FFD3-4C3A-877B-AAC9FF85AA56}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notifications", "Notifications\Notifications.csproj", "{648BA88D-FFD3-4C3A-877B-AAC9FF85AA56}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Notifications.DataAccess", "Notifications.DataAccess\Notifications.DataAccess.csproj", "{3D23BB85-94EC-4301-8030-0874E5C5B6CF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notifications.DataAccess", "Notifications.DataAccess\Notifications.DataAccess.csproj", "{3D23BB85-94EC-4301-8030-0874E5C5B6CF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Notifications.Services", "Notifications.Services\Notifications.Services.csproj", "{A2A3FB3A-68AD-41FE-B41D-A699495E5E32}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notifications.Services", "Notifications.Services\Notifications.Services.csproj", "{A2A3FB3A-68AD-41FE-B41D-A699495E5E32}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Notifications.Common", "Notifications.Common\Notifications.Common.csproj", "{89DE6294-2DDE-4226-9831-517E100E913A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notifications.Common", "Notifications.Common\Notifications.Common.csproj", "{89DE6294-2DDE-4226-9831-517E100E913A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Notifications.Tests", "Notifications.Tests\Notifications.Tests.csproj", "{104B27B6-EDF2-47F3-B34A-2E1A63014147}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notifications.Tests", "Notifications.Tests\Notifications.Tests.csproj", "{104B27B6-EDF2-47F3-B34A-2E1A63014147}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BAF844F2-A715-4D5B-A4B0-F8B51A55ABA8}"
+	ProjectSection(SolutionItems) = preProject
+		ArchitecturalDecisions.txt = ArchitecturalDecisions.txt
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

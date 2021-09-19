@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="CSharpFunctionalExtensions" Version="2.20.2" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Notifications.Common\Notifications.Common.csproj" />
   </ItemGroup>
 

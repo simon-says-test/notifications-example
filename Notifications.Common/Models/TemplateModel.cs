@@ -1,5 +1,5 @@
-using Notifications.Common.Enums;
 using System;
+using Notifications.Common.Fields;
 
 namespace Notifications.Common.Models
 {
@@ -9,8 +9,8 @@ namespace Notifications.Common.Models
 
         public string EventType { get; set; }
 
-        public string Body { get; set; }
+        public EventBody Body { get; set; }
 
-        public string Title { get; set; }
+        public EventTitle Title { get; set; }
     }
 }
