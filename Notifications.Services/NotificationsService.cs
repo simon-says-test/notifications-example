@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using CSharpFunctionalExtensions;
 using Notifications.Common.Fields;
 using Notifications.Common.Interfaces;
 using Notifications.Common.Models;
@@ -16,34 +17,49 @@ namespace Notifications.Services
             this.notificationsAccess = notificationsAccess;
         }
 
-        public IReadOnlyCollection<NotificationModel> GetNotifications(int? userId)
+        public Result<IQueryable<NotificationModel>> GetNotifications(int? userId)
         {
             return userId == null
-                ? this.notificationsAccess.GetAllNotifications().ToList()
-                : this.notificationsAccess.GetNotificationsForUser(userId.Value).ToList();
+                ? this.notificationsAccess.GetAllNotifications()
+                : this.notificationsAccess.GetNotificationsForUser(userId.Value);
         }
 
-        public NotificationModel CreateNotification(EventModel eventModel)
+        public Result<NotificationModel> CreateNotification(EventModel eventModel)
         {
-            TemplateModel template = this.notificationsAccess.GetTemplate(eventModel);
-            string body = template.Body.Value
-                    .Replace("{FirstName}", eventModel.Data.FirstName)
-                    .Replace("{AppointmentDateTime}", eventModel.Data.AppointmentDateTime.ToShortDateString() + " " + eventModel.Data.AppointmentDateTime.ToShortTimeString())
-                    .Replace("{OrganisationName}", eventModel.Data.OrganisationName)
-                    .Replace("{Reason}", eventModel.Data.Reason);
-
-            NotificationModel notification = new NotificationModel
+            Result<TemplateModel> templateResult = this.notificationsAccess.GetTemplate(eventModel);
+            Result<string> bodyResult = templateResult.Bind((result) => MapEventDataToBody(result.Body, eventModel.Data));
+            if (templateResult.IsFailure || bodyResult.IsFailure)
             {
-                Id = Guid.NewGuid(),
-                EventType = template.EventType,
-                Title = template.Title,
-                Body = EventBody.Create(body).Value,
-                UserId = eventModel.UserId
-            };
+                return Result.Failure<NotificationModel>(string.IsNullOrEmpty(templateResult.Error) ? bodyResult.Error : templateResult.Error);
+            }
 
-            this.notificationsAccess.CreateNotification(notification);
+            return templateResult
+                .Map((result) => new NotificationModel
+                {
+                    Id = Guid.NewGuid(),
+                    EventType = result.EventType,
+                    Title = result.Title,
+                    Body = EventBody.Create(bodyResult.Value).Value,
+                    UserId = eventModel.UserId
+                })
+                .Check((result) => this.notificationsAccess.CreateNotification(result));
+        }
 
-            return notification;
+        public Result<string> MapEventDataToBody(string body, EventDataModel eventData)
+        {
+            try
+            {
+                string result = body
+                    .Replace("{FirstName}", eventData.FirstName)
+                    .Replace("{AppointmentDateTime}", eventData.AppointmentDateTime.ToShortDateString() + " " + eventData.AppointmentDateTime.ToShortTimeString())
+                    .Replace("{OrganisationName}", eventData.OrganisationName)
+                    .Replace("{Reason}", eventData.Reason);
+                return Result.Success(result);
+            }
+            catch
+            {
+                return Result.Failure<string>("Bad event data");
+            }
         }
     }
 }

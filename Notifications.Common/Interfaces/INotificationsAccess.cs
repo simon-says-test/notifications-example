@@ -1,13 +1,15 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using CSharpFunctionalExtensions;
 using Notifications.Common.Models;
 
 namespace Notifications.Common.Interfaces
 {
     public interface INotificationsAccess
     {
-        IEnumerable<NotificationModel> GetAllNotifications();
-        IEnumerable<NotificationModel> GetNotificationsForUser(int userId);
-        TemplateModel GetTemplate(EventModel data);
-        void CreateNotification(NotificationModel notification);
+        Result<IQueryable<NotificationModel>> GetAllNotifications();
+        Result<IQueryable<NotificationModel>> GetNotificationsForUser(int userId);
+        Result<TemplateModel> GetTemplate(EventModel data);
+        Result CreateNotification(NotificationModel notification);
     }
 }

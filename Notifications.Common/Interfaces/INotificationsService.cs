@@ -1,12 +1,14 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using CSharpFunctionalExtensions;
 using Notifications.Common.Models;
 
 namespace Notifications.Common.Interfaces
 {
     public interface INotificationsService
     {
-        IReadOnlyCollection<NotificationModel> GetNotifications(int? userId);
+        Result<IQueryable<NotificationModel>> GetNotifications(int? userId);
 
-        NotificationModel CreateNotification(EventModel eventModel);
+        Result<NotificationModel> CreateNotification(EventModel eventModel);
     }
 }

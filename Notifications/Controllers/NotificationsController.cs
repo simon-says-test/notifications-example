@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using CSharpFunctionalExtensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Notifications.Common.Interfaces;
@@ -20,36 +21,18 @@ namespace Notifications.Controllers
 
         [Route("")]
         [HttpGet]
-        public IReadOnlyCollection<NotificationModel> Get(int? userId = null)
+        public IActionResult Get(int? userId = null)
         {
-            try
-            {
-                return _notificationsService.GetNotifications(userId);
-            }
-            catch
-            {
-                // Anything else is a problem 
-                Response.StatusCode = StatusCodes.Status500InternalServerError;
-                return null;
-            }
+            var notificationsResult = _notificationsService.GetNotifications(userId);
+            return Ok(notificationsResult.Value);
         }
 
         [Route("")]
         [HttpPost]
         public ActionResult Post(EventModel eventModel)
         {
-            try
-            {
-                return Ok(_notificationsService.CreateNotification(eventModel));
-            }
-            catch (Exception ex) when (ex is ArgumentException)
-            {
-                return BadRequest(ex.Message);  // Inform consumer of bad request data
-            }
-            catch
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
+            var notificationsResult = _notificationsService.CreateNotification(eventModel);
+            return notificationsResult.Finally((result) => result.IsSuccess ? Ok(notificationsResult.Value) : (ObjectResult)BadRequest(result.Error));
         }
     }
 }
