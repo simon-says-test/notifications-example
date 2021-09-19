@@ -1,6 +1,6 @@
 ﻿namespace Notifications.Models
 {
-    public class NotificationDataModel
+    public class Notification
     {
         public string EventType { get; set; }
 

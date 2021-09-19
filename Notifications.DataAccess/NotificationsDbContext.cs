@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Notifications.Common.Enums;
 using Notifications.Common.Fields;
 using Notifications.DataAccess.Entities;
@@ -18,6 +19,26 @@ namespace Notifications.DataAccess
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            var eventBodyConverter = new CastingConverter<EventBody, string>();
+            modelBuilder
+                .Entity<TemplateEntity>()
+                .Property(e => e.Body)
+                .HasConversion(eventBodyConverter);
+            modelBuilder
+                .Entity<NotificationEntity>()
+                .Property(e => e.Body)
+                .HasConversion(eventBodyConverter);
+
+            var eventTitleConverter = new CastingConverter<EventTitle, string>();
+            modelBuilder
+                .Entity<TemplateEntity>()
+                .Property(e => e.Title)
+                .HasConversion(eventTitleConverter);
+            modelBuilder
+                .Entity<NotificationEntity>()
+                .Property(e => e.Title)
+                .HasConversion(eventTitleConverter);
 
             modelBuilder.Entity<TemplateEntity>().HasData(
                 new TemplateEntity(

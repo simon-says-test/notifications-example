@@ -64,7 +64,7 @@ namespace Notifications.DataAccess.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("6094b077-adc5-4289-b000-108dd784c086"),
+                            Id = new Guid("11acb166-d82e-48da-adcd-9967c7565f2e"),
                             Body = "Hi {FirstName}, your appointment with {OrganisationName} at {AppointmentDateTime} has been - cancelled for the following reason: {Reason}.",
                             EventType = 0,
                             Title = "Appointment Cancelled"

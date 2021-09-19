@@ -6,37 +6,31 @@ namespace Notifications.DataAccess.Entities
 {
     public class NotificationEntity
     {
-        private Guid _id;
-        private EventType _eventType;
-        private string _body;
-        private string _title;
-        private int _userId;
-
         protected NotificationEntity()
         {
         }
 
         public NotificationEntity(Guid id, EventType eventType, EventBody eventBody, EventTitle eventTitle, int userId)
         {
-            _id = id;
+            Id = id;
             Update(eventType, eventBody, eventTitle, userId);
         }
         public void Update(EventType eventType, EventBody eventBody, EventTitle eventTitle, int userId)
         {
-            _eventType = eventType;
-            _body = eventBody;
-            _title = eventTitle;
-            _userId = userId;
+            EventType = eventType;
+            Body = eventBody;
+            Title = eventTitle;
+            UserId = userId;
         }
 
-        public Guid Id => _id;
+        public Guid Id { get; private set; }
 
-        public EventType EventType => _eventType;
+        public EventType EventType { get; private set; }
 
-        public EventBody Body => (EventBody)_body;
+        public EventBody Body { get; private set; }
 
-        public EventTitle Title => (EventTitle)_title;
+        public EventTitle Title { get; private set; }
 
-        public int UserId => _userId;
+        public int UserId { get; private set; }
     }
 }
