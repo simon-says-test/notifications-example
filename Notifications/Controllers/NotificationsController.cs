@@ -21,6 +21,8 @@ namespace Notifications.Controllers
 
         [Route("")]
         [HttpGet]
+        [ProducesResponseType(typeof(List<NotificationModel>), 200)]
+        [ProducesResponseType(typeof(string), 400)]
         public IActionResult Get(int? userId = null)
         {
             var notificationsResult = _notificationsService.GetNotifications(userId);
@@ -29,10 +31,15 @@ namespace Notifications.Controllers
 
         [Route("")]
         [HttpPost]
+        [ProducesResponseType(typeof(NotificationModel), 200)]
+        [ProducesResponseType(typeof(string), 400)]
         public ActionResult Post(EventModel eventModel)
         {
             var notificationsResult = _notificationsService.CreateNotification(eventModel);
-            return notificationsResult.Finally((result) => result.IsSuccess ? Ok(notificationsResult.Value) : (ObjectResult)BadRequest(result.Error));
+            return notificationsResult.Finally(
+                (result) => result.IsSuccess
+                    ? Ok(notificationsResult.Value)
+                    : (ObjectResult)BadRequest(result.Error));
         }
     }
 }

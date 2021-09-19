@@ -153,12 +153,12 @@ namespace Notifications.Tests
             Assert.Equal(HttpStatusCode.OK, getResponse4.StatusCode);
             Assert.Equal(2, getResult4.Length);
 
-            var jimResult = getResult4.First(x => x.Body.Value.Contains("Jim"));
+            var jimResult = getResult4.First(x => x.Body.Contains("Jim"));
             Assert.Equal("Appointment Cancelled", jimResult.Title);
             Assert.Equal(2, jimResult.UserId);
             Assert.Equal("Hi Jim, your appointment with Jim's builders at 10/02/2012 00:00 has been - cancelled for the following reason: Can't do it.", jimResult.Body);
 
-            var dorisResult = getResult4.First(x => x.Body.Value.Contains("Doris"));
+            var dorisResult = getResult4.First(x => x.Body.Contains("Doris"));
             Assert.Equal("Appointment Cancelled", dorisResult.Title);
             Assert.Equal(2, dorisResult.UserId);
             Assert.Equal("Hi Doris, your appointment with Doris's builders at 12/03/2012 05:59 has been - cancelled for the following reason: Not coming.", dorisResult.Body);
@@ -200,7 +200,7 @@ namespace Notifications.Tests
                 .ConfigureAwait(false);
             var postContent = await postResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
             Assert.Equal(HttpStatusCode.BadRequest, postResponse.StatusCode);
-            Assert.Equal("The requested Event Type (0) was not found. (Parameter 'AppointmentFinished')", postContent);
+            Assert.Equal("The requested EventType: (AppointmentFinished) was not found.", postContent);
 
             // Post a second event with type for which no template exists and verify that it is reported correctly
             EventModel eventModel2 = new EventModel
@@ -220,7 +220,7 @@ namespace Notifications.Tests
                 .ConfigureAwait(false);
             var postContent2 = await postResponse2.Content.ReadAsStringAsync().ConfigureAwait(false);
             Assert.Equal(HttpStatusCode.BadRequest, postResponse2.StatusCode);
-            Assert.Equal("The requested Event Type (0) was not found. (Parameter 'AppointmentPostponed')", postContent2);
+            Assert.Equal("The requested EventType: (AppointmentPostponed) was not found.", postContent2);
         }
     }
 }

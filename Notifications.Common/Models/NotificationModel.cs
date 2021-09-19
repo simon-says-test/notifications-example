@@ -9,9 +9,9 @@ namespace Notifications.Common.Models
 
         public string EventType { get; set; }
 
-        public EventBody Body { get; set; }
+        public string Body { get; set; }
 
-        public EventTitle Title { get; set; }
+        public string Title { get; set; }
 
         public int UserId { get; set; }
     }

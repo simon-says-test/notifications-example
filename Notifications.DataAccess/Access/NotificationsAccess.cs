@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using CSharpFunctionalExtensions;
 using Notifications.Common.Enums;
@@ -21,21 +20,14 @@ namespace Notifications.DataAccess.Access
 
         public Result CreateNotification(NotificationModel notification)
         {
-            EventType eventType;
+            Result<EventType> eventTypeResult = Enum<EventType>.Create(notification.EventType);
+            Result<EventBody> eventBodyResult = EventBody.Create(notification.Body);
+            Result<EventTitle> eventTitleResult = EventTitle.Create(notification.Title);
 
-            try
-            {
-                eventType = (EventType)Enum.Parse(typeof(EventType), notification.EventType, true);
-            }
-            catch (Exception ex) when (ex is ArgumentNullException || ex is ArgumentException || ex is OverflowException)
-            {
-                return Result.Failure($"The requested Event Type ({notification.EventType}) was not found.");
-            }
-
-            dbContext.Notifications.Add(
-                new NotificationEntity(notification.Id, eventType, notification.Body, notification.Title, notification.UserId));
-            dbContext.SaveChanges();
-            return Result.Success();
+            return Result.Combine(eventTypeResult, eventBodyResult, eventTitleResult)
+                .Tap(() => dbContext.Notifications.Add(
+                    new NotificationEntity(notification.Id, eventTypeResult.Value, eventBodyResult.Value, eventTitleResult.Value, notification.UserId)))
+                .Tap(() => dbContext.SaveChanges());
         }
 
         public Result<IQueryable<NotificationModel>> GetAllNotifications()
@@ -69,27 +61,18 @@ namespace Notifications.DataAccess.Access
             return Result.Success(notifications);
         }
 
-        public Result<TemplateModel> GetTemplate(EventModel data)
+        public Result<TemplateModel> GetTemplate(EventModel eventModel)
         {
-            try
-            {
-                EventType eventType = (EventType)Enum.Parse(typeof(EventType), data.Type, true);
-
-                TemplateEntity template = dbContext.Templates.Single(x => x.EventType == eventType);
-
-                return Result.Success(
+            return Enum<EventType>.Create(eventModel.Type)
+                .Map(result => dbContext.Templates.Single(x => x.EventType == result))
+                .Map(result =>
                     new TemplateModel()
                     {
-                        Id = template.Id,
-                        EventType = template.EventType.ToString(),
-                        Body = template.Body,
-                        Title = template.Title
+                        Id = result.Id,
+                        EventType = result.EventType.ToString(),
+                        Body = result.Body,
+                        Title = result.Title
                     });
-            }
-            catch (Exception ex) when (ex is ArgumentNullException || ex is ArgumentException || ex is OverflowException || ex is InvalidOperationException)
-            {
-                return Result.Failure<TemplateModel>($"The requested Event Type ({data.Type}) was not found.");
-            }
         }
     }
 }

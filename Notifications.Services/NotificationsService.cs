@@ -39,7 +39,7 @@ namespace Notifications.Services
                     Id = Guid.NewGuid(),
                     EventType = result.EventType,
                     Title = result.Title,
-                    Body = EventBody.Create(bodyResult.Value).Value,
+                    Body = bodyResult.Value,
                     UserId = eventModel.UserId
                 })
                 .Check((result) => this.notificationsAccess.CreateNotification(result));

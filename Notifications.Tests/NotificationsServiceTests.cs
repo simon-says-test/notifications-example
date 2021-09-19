@@ -20,8 +20,8 @@ namespace Notifications.Tests
             {
                 Id = Guid.NewGuid(),
                 EventType = "AppointmentCancelled",
-                Body = EventBody.Create("Hi {FirstName}, {OrganisationName}, {AppointmentDateTime}, {Reason}.").Value,
-                Title = EventTitle.Create("Appointment Cancelled").Value
+                Body = "Hi {FirstName}, {OrganisationName}, {AppointmentDateTime}, {Reason}.",
+                Title = "Appointment Cancelled"
             };
 
             EventModel eventModel = new EventModel
@@ -67,8 +67,8 @@ namespace Notifications.Tests
             {
                 Id = Guid.NewGuid(),
                 EventType = "AppointmentCancelled",
-                Body = EventBody.Create("Hi FirstName, OrganisationName, AppointmentDateTime, Reason.").Value,
-                Title = EventTitle.Create("Appointment Cancelled").Value
+                Body = "Hi FirstName, OrganisationName, AppointmentDateTime, Reason.",
+                Title = "Appointment Cancelled"
             };
 
             Mock<INotificationsAccess> notificationsAccessMock = new Mock<INotificationsAccess>(MockBehavior.Strict);
@@ -91,8 +91,8 @@ namespace Notifications.Tests
             {
                 Id = Guid.NewGuid(),
                 EventType = "AppointmentCancelled",
-                Body = EventBody.Create("Hi FirstName, OrganisationName, AppointmentDateTime, Reason.").Value,
-                Title = EventTitle.Create("Appointment Cancelled").Value
+                Body = "Hi FirstName, OrganisationName, AppointmentDateTime, Reason.",
+                Title = "Appointment Cancelled"
             };
 
             Mock<INotificationsAccess> notificationsAccessMock = new Mock<INotificationsAccess>(MockBehavior.Strict);
