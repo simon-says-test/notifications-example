@@ -5,5 +5,4 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-[assembly: SuppressMessage("Simplification", "RCS1021:Convert lambda expression body to expression-body.", Justification = "Auto-generated code", Scope = "namespaceanddescendants", Target = "~N:Notifications.DataAccess.Migrations")]
 [assembly: SuppressMessage("Design", "RCS1090:Add call to 'ConfigureAwait' (or vice versa).", Justification = "ASP.NET Core doesn't use thread context to store request context.", Scope = "module")]

@@ -1,5 +1,8 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
+using Microsoft.EntityFrameworkCore;
 using Notifications.Common.Enums;
 using Notifications.Common.Fields;
 using Notifications.Common.Interfaces;
@@ -17,21 +20,21 @@ namespace Notifications.DataAccess.Access
             this.dbContext = dbContext;
         }
 
-        public Result CreateNotification(NotificationModel notification)
+        public async Task<Result> CreateNotification(NotificationModel notification)
         {
             Result<EventType> eventTypeResult = Enum<EventType>.Create(notification.EventType);
             Result<EventBody> eventBodyResult = EventBody.Create(notification.Body);
             Result<EventTitle> eventTitleResult = EventTitle.Create(notification.Title);
 
-            return Result.Combine(eventTypeResult, eventBodyResult, eventTitleResult)
+            return await Task.FromResult(Result.Combine(eventTypeResult, eventBodyResult, eventTitleResult))
                 .Tap(() => dbContext.Notifications.Add(
                     new NotificationEntity(notification.Id, eventTypeResult.Value, eventBodyResult.Value, eventTitleResult.Value, notification.UserId)))
-                .Tap(() => dbContext.SaveChanges());
+                .Tap(() => dbContext.SaveChangesAsync());
         }
 
-        public Result<IQueryable<NotificationModel>> GetAllNotifications()
+        public async Task<Result<List<NotificationModel>>> GetAllNotifications()
         {
-            var notifications = dbContext.Notifications
+            var notifications = await dbContext.Notifications
                 .OrderBy(x => x.Id)
                 .Select(x => new NotificationModel()
                 {
@@ -40,13 +43,14 @@ namespace Notifications.DataAccess.Access
                     Title = x.Title,
                     Body = x.Body,
                     UserId = x.UserId
-                });
+                })
+                .ToListAsync();
             return Result.Success(notifications);
         }
 
-        public Result<IQueryable<NotificationModel>> GetNotificationsForUser(int userId)
+        public async Task<Result<List<NotificationModel>>> GetNotificationsForUser(int userId)
         {
-            var notifications = dbContext.Notifications
+            var notifications = await dbContext.Notifications
                 .Where(x => x.UserId == userId)
                 .OrderBy(x => x.Id)
                 .Select(x => new NotificationModel()
@@ -56,14 +60,15 @@ namespace Notifications.DataAccess.Access
                     Title = x.Title,
                     Body = x.Body,
                     UserId = x.UserId
-                });
+                })
+                .ToListAsync();
             return Result.Success(notifications);
         }
 
-        public Result<TemplateModel> GetTemplate(EventModel eventModel)
+        public Task<Result<TemplateModel>> GetTemplate(EventModel eventModel)
         {
             return Enum<EventType>.Create(eventModel.Type)
-                .Map(result => dbContext.Templates.Single(x => x.EventType == result))
+                .Map(result => dbContext.Templates.SingleAsync(x => x.EventType == result))
                 .Map(result =>
                     new TemplateModel()
                     {

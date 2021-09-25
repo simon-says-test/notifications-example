@@ -1,5 +1,6 @@
 ﻿using System;
-using System.Linq;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using Notifications.Common.Interfaces;
 using Notifications.Common.Models;
@@ -15,16 +16,16 @@ namespace Notifications.Services
             this.notificationsAccess = notificationsAccess;
         }
 
-        public Result<IQueryable<NotificationModel>> GetNotifications(int? userId)
+        public async Task<Result<List<NotificationModel>>> GetNotifications(int? userId)
         {
             return userId == null
-                ? this.notificationsAccess.GetAllNotifications()
-                : this.notificationsAccess.GetNotificationsForUser(userId.Value);
+                ? await this.notificationsAccess.GetAllNotifications()
+                : await this.notificationsAccess.GetNotificationsForUser(userId.Value);
         }
 
-        public Result<NotificationModel> CreateNotification(EventModel eventModel)
+        public async Task<Result<NotificationModel>> CreateNotification(EventModel eventModel)
         {
-            Result<TemplateModel> templateResult = this.notificationsAccess.GetTemplate(eventModel);
+            Result<TemplateModel> templateResult = await this.notificationsAccess.GetTemplate(eventModel);
             Result<string> bodyResult = templateResult
                 .Bind((result) => MapEventDataToBody(result.Body, eventModel.Data));
             if (templateResult.IsFailure || bodyResult.IsFailure)
@@ -32,7 +33,7 @@ namespace Notifications.Services
                 return Result.Failure<NotificationModel>(templateResult.IsFailure ? templateResult.Error : bodyResult.Error);
             }
 
-            return templateResult
+            return await Task.FromResult(templateResult)
                 .Map((result) => new NotificationModel
                 {
                     Id = Guid.NewGuid(),

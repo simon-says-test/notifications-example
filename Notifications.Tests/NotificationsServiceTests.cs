@@ -8,13 +8,14 @@ using System.Collections.Generic;
 using System.Linq;
 using Notifications.Common.Fields;
 using CSharpFunctionalExtensions;
+using System.Threading.Tasks;
 
 namespace Notifications.Tests
 {
     public class NotificationsServiceTests
     {
         [Fact]
-        public void CreateNotification()
+        public async void CreateNotification()
         {
             TemplateModel templateModel = new()
             {
@@ -40,13 +41,13 @@ namespace Notifications.Tests
             Mock<INotificationsAccess> notificationsAccessMock = new(MockBehavior.Strict);
             notificationsAccessMock
                 .Setup(x => x.GetTemplate(It.IsAny<EventModel>()))
-                .Returns(Result.Success(templateModel));
+                .Returns(Task.FromResult(Result.Success(templateModel)));
             notificationsAccessMock
                 .Setup(x => x.CreateNotification(It.IsAny<NotificationModel>()))
-                .Returns(Result.Success);
+                .Returns(Task.FromResult(Result.Success()));
 
             INotificationsService notificationsService = new NotificationsService(notificationsAccessMock.Object);
-            Result<NotificationModel> notificationModel = notificationsService.CreateNotification(eventModel);
+            Result<NotificationModel> notificationModel = await notificationsService.CreateNotification(eventModel);
 
             Assert.True(notificationModel.IsSuccess);
             Assert.Equal(templateModel.EventType, notificationModel.Value.EventType);
@@ -61,7 +62,7 @@ namespace Notifications.Tests
         }
 
         [Fact]
-        public void GetNotificationsForAllUsers()
+        public async void GetNotificationsForAllUsers()
         {
             NotificationModel notificationModel = new()
             {
@@ -72,20 +73,21 @@ namespace Notifications.Tests
             };
 
             Mock<INotificationsAccess> notificationsAccessMock = new(MockBehavior.Strict);
-            notificationsAccessMock.Setup(x => x.GetAllNotifications()).Returns(Result.Success(new List<NotificationModel> { notificationModel }.AsQueryable()));
+            notificationsAccessMock.Setup(x => x.GetAllNotifications())
+                .Returns(Task.FromResult(Result.Success(new List<NotificationModel> { notificationModel })));
 
             INotificationsService notificationsService = new NotificationsService(notificationsAccessMock.Object);
-            var notifications = notificationsService.GetNotifications(null);
+            var notifications = await notificationsService.GetNotifications(null);
 
             Assert.True(notifications.IsSuccess);
-            Assert.Equal(1, notifications.Value.Count());
-            Assert.Equal(notificationModel, notifications.Value.First());
+            Assert.Single(notifications.Value);
+            Assert.Equal(notificationModel, notifications.Value[0]);
 
             notificationsAccessMock.Verify(x => x.GetAllNotifications(), Times.Once);
         }
 
         [Fact]
-        public void GetNotificationsForAUser()
+        public async void GetNotificationsForAUser()
         {
             NotificationModel notificationModel = new()
             {
@@ -96,23 +98,25 @@ namespace Notifications.Tests
             };
 
             Mock<INotificationsAccess> notificationsAccessMock = new(MockBehavior.Strict);
-            notificationsAccessMock.Setup(x => x.GetNotificationsForUser(5)).Returns(Result.Success(new List<NotificationModel> { notificationModel }.AsQueryable()));
-            notificationsAccessMock.Setup(x => x.GetNotificationsForUser(4)).Returns(Result.Success(new List<NotificationModel>().AsQueryable()));
+            notificationsAccessMock.Setup(x => x.GetNotificationsForUser(5))
+                .Returns(Task.FromResult(Result.Success(new List<NotificationModel> { notificationModel })));
+            notificationsAccessMock.Setup(x => x.GetNotificationsForUser(4))
+                .Returns(Task.FromResult(Result.Success(new List<NotificationModel>())));
 
             INotificationsService notificationsService = new NotificationsService(notificationsAccessMock.Object);
 
             // Verify notification is found
-            var notifications = notificationsService.GetNotifications(5);
+            var notifications = await notificationsService.GetNotifications(5);
             Assert.True(notifications.IsSuccess);
-            Assert.Equal(1, notifications.Value.Count());
-            Assert.Equal(notificationModel, notifications.Value.First());
+            Assert.Single(notifications.Value);
+            Assert.Equal(notificationModel, notifications.Value[0]);
 
             notificationsAccessMock.Verify(x => x.GetNotificationsForUser(5), Times.Once);
 
             // Verify notification is not found
-            var notifications2 = notificationsService.GetNotifications(4);
+            var notifications2 = await notificationsService.GetNotifications(4);
             Assert.True(notifications2.IsSuccess);
-            Assert.Equal(0, notifications2.Value.Count());
+            Assert.Empty(notifications2.Value);
             notificationsAccessMock.Verify(x => x.GetNotificationsForUser(4), Times.Once);
         }
     }

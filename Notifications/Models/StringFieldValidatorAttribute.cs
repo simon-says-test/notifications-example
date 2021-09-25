@@ -9,7 +9,7 @@ namespace Notifications.Models
     {
         protected override ValidationResult IsValid(object value, ValidationContext context)
         {
-            if (value != null && !value.GetType().IsAssignableTo(typeof(string)))
+            if (value?.GetType().IsAssignableTo(typeof(string)) == false)
             {
                 throw new ArgumentException(
                     $"{this.GetType()} cannot be used to validate property {context.MemberName} " +
