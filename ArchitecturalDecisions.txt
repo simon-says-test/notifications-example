@@ -2,6 +2,5 @@ Entities:
 - Mark the default constructor as protected to prevent unvalidated creation by code
 - Public constructor takes validated non-primitives as parameters which are converted to the entity primitive properties
 - The entity properties are read-only
-- If you needed to update an entity, there are a few choices to make:
-    -  
+- Is it possible to make models validatable to allow serilise but entities have to be cret/update method 
 - COuld entity subclasses be used for differnet event types

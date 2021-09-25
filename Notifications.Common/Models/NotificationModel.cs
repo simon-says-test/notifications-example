@@ -1,5 +1,4 @@
-﻿using Notifications.Common.Fields;
-using System;
+﻿using System;
 
 namespace Notifications.Common.Models
 {

@@ -16,7 +16,7 @@ namespace Notifications.Tests
         [Fact]
         public void CreateNotification()
         {
-            TemplateModel templateModel = new TemplateModel
+            TemplateModel templateModel = new()
             {
                 Id = Guid.NewGuid(),
                 EventType = "AppointmentCancelled",
@@ -24,7 +24,7 @@ namespace Notifications.Tests
                 Title = "Appointment Cancelled"
             };
 
-            EventModel eventModel = new EventModel
+            EventModel eventModel = new()
             {
                 UserId = 1,
                 Type = "AppointmentCancelled",
@@ -37,7 +37,7 @@ namespace Notifications.Tests
                 }
             };
 
-            Mock<INotificationsAccess> notificationsAccessMock = new Mock<INotificationsAccess>(MockBehavior.Strict);
+            Mock<INotificationsAccess> notificationsAccessMock = new(MockBehavior.Strict);
             notificationsAccessMock
                 .Setup(x => x.GetTemplate(It.IsAny<EventModel>()))
                 .Returns(Result.Success(templateModel));
@@ -63,15 +63,15 @@ namespace Notifications.Tests
         [Fact]
         public void GetNotificationsForAllUsers()
         {
-            NotificationModel notificationModel = new NotificationModel
+            NotificationModel notificationModel = new()
             {
                 Id = Guid.NewGuid(),
                 EventType = "AppointmentCancelled",
                 Body = "Hi FirstName, OrganisationName, AppointmentDateTime, Reason.",
-                Title = "Appointment Cancelled"
+                Title = (EventTitle)"Appointment Cancelled"
             };
 
-            Mock<INotificationsAccess> notificationsAccessMock = new Mock<INotificationsAccess>(MockBehavior.Strict);
+            Mock<INotificationsAccess> notificationsAccessMock = new(MockBehavior.Strict);
             notificationsAccessMock.Setup(x => x.GetAllNotifications()).Returns(Result.Success(new List<NotificationModel> { notificationModel }.AsQueryable()));
 
             INotificationsService notificationsService = new NotificationsService(notificationsAccessMock.Object);
@@ -87,15 +87,15 @@ namespace Notifications.Tests
         [Fact]
         public void GetNotificationsForAUser()
         {
-            NotificationModel notificationModel = new NotificationModel
+            NotificationModel notificationModel = new()
             {
                 Id = Guid.NewGuid(),
                 EventType = "AppointmentCancelled",
                 Body = "Hi FirstName, OrganisationName, AppointmentDateTime, Reason.",
-                Title = "Appointment Cancelled"
+                Title = (EventTitle)"Appointment Cancelled"
             };
 
-            Mock<INotificationsAccess> notificationsAccessMock = new Mock<INotificationsAccess>(MockBehavior.Strict);
+            Mock<INotificationsAccess> notificationsAccessMock = new(MockBehavior.Strict);
             notificationsAccessMock.Setup(x => x.GetNotificationsForUser(5)).Returns(Result.Success(new List<NotificationModel> { notificationModel }.AsQueryable()));
             notificationsAccessMock.Setup(x => x.GetNotificationsForUser(4)).Returns(Result.Success(new List<NotificationModel>().AsQueryable()));
 

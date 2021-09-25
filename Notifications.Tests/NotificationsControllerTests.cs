@@ -50,7 +50,7 @@ namespace Notifications.Tests
             Assert.Empty(getResult2);
 
             // Post an event and verify that the resulting notification is returned and saved
-            EventModel eventModel = new EventModel
+            EventModel eventModel = new()
             {
                 UserId = 1,
                 Type = "AppointmentCancelled",
@@ -80,7 +80,7 @@ namespace Notifications.Tests
             Assert.Equal("Hi Bob, your appointment with Bob's builders at 10/02/2011 00:00 has been - cancelled for the following reason: Can't make it.", notification.Body);
 
             // Post a second event and verify that the resulting notification is returned and saved
-            EventModel eventModel2 = new EventModel
+            EventModel eventModel2 = new()
             {
                 UserId = 2,
                 Type = "AppointmentCancelled",
@@ -110,7 +110,7 @@ namespace Notifications.Tests
             Assert.Equal("Hi Jim, your appointment with Jim's builders at 10/02/2012 00:00 has been - cancelled for the following reason: Can't do it.", notification2.Body);
 
             // Post a third event and verify that the resulting notification is returned and saved
-            EventModel eventModel3 = new EventModel
+            EventModel eventModel3 = new()
             {
                 UserId = 2,
                 Type = "AppointmentCancelled",
@@ -183,7 +183,7 @@ namespace Notifications.Tests
             Assert.Equal(HttpStatusCode.OK, getResponse2.StatusCode);
 
             // Post an event with incorrect Type and verify that it is reported correctly
-            EventModel eventModel = new EventModel
+            EventModel eventModel = new()
             {
                 UserId = 1,
                 Type = "AppointmentFinished",  // Incorrect
@@ -203,7 +203,7 @@ namespace Notifications.Tests
             Assert.Equal("The requested EventType: (AppointmentFinished) was not found.", postContent);
 
             // Post a second event with type for which no template exists and verify that it is reported correctly
-            EventModel eventModel2 = new EventModel
+            EventModel eventModel2 = new()
             {
                 UserId = 2,
                 Type = "AppointmentPostponed",  // Valid but no template

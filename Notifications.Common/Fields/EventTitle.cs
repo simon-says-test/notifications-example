@@ -1,25 +1,27 @@
 ﻿using CSharpFunctionalExtensions;
-using System.Collections.Generic;
 
 namespace Notifications.Common.Fields
 {
-    public sealed class EventTitle : ValueObject
+    public sealed class EventTitle : StringField
     {
-        public string Value { get; }
-
-        private EventTitle(string value)
+        private EventTitle(string value) : base(value)
         {
-            Value = value;
         }
 
         public static Result<EventTitle> Create(Maybe<string> eventTitleOrNothing)
         {
-            return eventTitleOrNothing
-                .ToResult("Event body should not be empty")
+            // Convert to record and clone
+            return Validate(eventTitleOrNothing)
+                .Map(name => new EventTitle(name));
+        }
+
+        public static Result<string> Validate(Maybe<string> stringValueOrNothing)
+        {
+            return stringValueOrNothing
+                .ToResult("Value should not be empty")
                 .Map(name => name.Trim())
                 .Ensure(name => name != string.Empty, "Event body should not be empty")
-                .Ensure(name => name.Length <= 255, "Event body is too long")
-                .Map(name => new EventTitle(name));
+                .Ensure(name => name.Length <= 255, "Event body is too long");
         }
 
         public static explicit operator EventTitle(string eventTitle)
@@ -30,11 +32,6 @@ namespace Notifications.Common.Fields
         public static implicit operator string(EventTitle eventTitle)
         {
             return eventTitle.Value;
-        }
-
-        protected override IEnumerable<object> GetEqualityComponents()
-        {
-            yield return Value;
         }
     }
 }

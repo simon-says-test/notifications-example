@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using CSharpFunctionalExtensions;
-using Microsoft.AspNetCore.Http;
+﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Notifications.Common.Interfaces;
 using Notifications.Common.Models;
@@ -26,7 +23,9 @@ namespace Notifications.Controllers
         public IActionResult Get(int? userId = null)
         {
             var notificationsResult = _notificationsService.GetNotifications(userId);
-            return Ok(notificationsResult.Value);
+            return notificationsResult.IsSuccess
+                    ? Ok(notificationsResult.Value)
+                    : BadRequest(notificationsResult.Error);
         }
 
         [Route("")]
@@ -36,10 +35,9 @@ namespace Notifications.Controllers
         public ActionResult Post(EventModel eventModel)
         {
             var notificationsResult = _notificationsService.CreateNotification(eventModel);
-            return notificationsResult.Finally(
-                (result) => result.IsSuccess
+            return notificationsResult.IsSuccess
                     ? Ok(notificationsResult.Value)
-                    : (ObjectResult)BadRequest(result.Error));
+                    : BadRequest(notificationsResult.Error);
         }
     }
 }

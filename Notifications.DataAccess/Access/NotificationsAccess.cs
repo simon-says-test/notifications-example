@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using CSharpFunctionalExtensions;
 using Notifications.Common.Enums;
 using Notifications.Common.Fields;

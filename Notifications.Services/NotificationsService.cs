@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using CSharpFunctionalExtensions;
-using Notifications.Common.Fields;
 using Notifications.Common.Interfaces;
 using Notifications.Common.Models;
 
@@ -27,10 +25,11 @@ namespace Notifications.Services
         public Result<NotificationModel> CreateNotification(EventModel eventModel)
         {
             Result<TemplateModel> templateResult = this.notificationsAccess.GetTemplate(eventModel);
-            Result<string> bodyResult = templateResult.Bind((result) => MapEventDataToBody(result.Body, eventModel.Data));
+            Result<string> bodyResult = templateResult
+                .Bind((result) => MapEventDataToBody(result.Body, eventModel.Data));
             if (templateResult.IsFailure || bodyResult.IsFailure)
             {
-                return Result.Failure<NotificationModel>(string.IsNullOrEmpty(templateResult.Error) ? bodyResult.Error : templateResult.Error);
+                return Result.Failure<NotificationModel>(templateResult.IsFailure ? templateResult.Error : bodyResult.Error);
             }
 
             return templateResult
@@ -45,7 +44,7 @@ namespace Notifications.Services
                 .Check((result) => this.notificationsAccess.CreateNotification(result));
         }
 
-        public Result<string> MapEventDataToBody(string body, EventDataModel eventData)
+        public static Result<string> MapEventDataToBody(string body, EventDataModel eventData)
         {
             try
             {
@@ -58,7 +57,7 @@ namespace Notifications.Services
             }
             catch
             {
-                return Result.Failure<string>("Bad event data");
+                return Result.Failure<string>("Bad template or event data");
             }
         }
     }
