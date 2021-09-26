@@ -8,6 +8,7 @@ using Microsoft.OpenApi.Models;
 using Notifications.Common.Interfaces;
 using Notifications.DataAccess;
 using Notifications.DataAccess.Access;
+using Notifications.Middleware;
 using Notifications.Services;
 
 namespace Notifications
@@ -50,6 +51,7 @@ namespace Notifications
                 app.UseHsts();
             }
 
+            app.UseMiddleware<RequestLoggingMiddleware>();
             app.UseHttpsRedirection();
 
             app.UseRouting();
