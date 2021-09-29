@@ -2,7 +2,7 @@
 using Notifications.Common.Fields;
 using System;
 
-namespace Notifications.Models
+namespace Notifications.Attributes
 {
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
     public class EventTitleValidatorAttribute : StringFieldValidatorAttribute

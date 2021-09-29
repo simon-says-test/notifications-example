@@ -1,8 +1,8 @@
-﻿using Notifications.Models;
-using Xunit;
+﻿using Xunit;
 using System.ComponentModel.DataAnnotations;
 using System;
 using System.Collections.Generic;
+using Notifications.Attributes;
 
 namespace Notifications.Tests
 {
@@ -81,7 +81,7 @@ namespace Notifications.Tests
             void action() => Validator.TryValidateObject(input, ctx, validationResults, true);
 
             ArgumentException exception = Assert.Throws<ArgumentException>(action);
-            Assert.Equal("Notifications.Models.EventTitleValidatorAttribute cannot be used to validate property " +
+            Assert.Equal("Notifications.Attributes.EventTitleValidatorAttribute cannot be used to validate property " +
                 "Integer on Notifications.Tests.InvalidObjectToValidate as the property type (System.Int32) is not assignable to a string"
                 , exception.Message);
         }

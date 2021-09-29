@@ -2,7 +2,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace Notifications.Models
+namespace Notifications.Attributes
 {
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
     public abstract class StringFieldValidatorAttribute : ValidationAttribute
@@ -12,7 +12,7 @@ namespace Notifications.Models
             if (value?.GetType().IsAssignableTo(typeof(string)) == false)
             {
                 throw new ArgumentException(
-                    $"{this.GetType()} cannot be used to validate property {context.MemberName} " +
+                    $"{GetType()} cannot be used to validate property {context.MemberName} " +
                     $"on {context.ObjectType} as the property type ({value.GetType()}) is not assignable to a string");
             }
 
