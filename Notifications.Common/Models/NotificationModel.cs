@@ -2,7 +2,7 @@
 
 namespace Notifications.Common.Models
 {
-    public class NotificationModel
+    public record NotificationModel
     {
         public Guid Id { get; set; }
 

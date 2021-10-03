@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Notifications.Attributes;
 using Notifications.Common.Interfaces;
 using Notifications.Common.Models;
 
@@ -24,6 +25,7 @@ namespace Notifications.Controllers
 
         [Route("")]
         [HttpGet]
+        [ValidateQueryParametersAttribute]
         [ProducesResponseType(typeof(List<NotificationModel>), 200)]
         [ProducesResponseType(typeof(string), 400)]
         public async Task<IActionResult> Get(int? userId = null)

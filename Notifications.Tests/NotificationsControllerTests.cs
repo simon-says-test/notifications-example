@@ -12,6 +12,9 @@ using System.Net;
 using System.Text;
 using Notifications.DataAccess.Entities;
 using Microsoft.Extensions.Configuration;
+using Notifications.Tests.Helpers;
+using Notifications.Common.Enums;
+using Notifications.Common.Fields;
 
 namespace Notifications.Tests
 {
@@ -28,28 +31,176 @@ namespace Notifications.Tests
             client = server.CreateClient();
             builder = new DbContextOptionsBuilder<NotificationsDbContext>().UseSqlServer(Startup.Configuration().GetConnectionString("NotificationsContext"));
             context = new NotificationsDbContext(builder.Options);
+        }
+
+        [Fact]
+        public async void When_Get_Notifications_Where_NoneExist_Expect_NoNotificationsReturned()
+        {
+            // Arrange
             context.Notifications.RemoveRange(context.Notifications);
             context.SaveChanges();
+
+            // Act
+            var response = await client.GetAsync("/api/Notifications").ConfigureAwait(false);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var result = await response.GetObjectFromContentString<NotificationModel[]>();
+            Assert.Empty(result);
         }
 
         [Fact]
-        public async void HappyPath()
+        public async void When_Get_NotificationsForUser_Where_NoneExistForUser_Expect_NoNotificationsReturned()
         {
-            // Verify that there are zero notifications 
-            var getResponse = await client.GetAsync("/api/Notifications").ConfigureAwait(false);
-            var getContent = await getResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
-            var getResult = JsonSerializer.Deserialize<NotificationModel[]>(getContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
-            Assert.Empty(getResult);
+            // Arrange
+            NotificationEntity notificationEntity1 = new(Guid.NewGuid(),
+                                                         EventType.AppointmentCancelled,
+                                                         EventBody.Create("body1").Value,
+                                                         EventTitle.Create("Title1").Value,
+                                                         1);
 
-            // Verify that there are zero filtered notifications
-            var getResponse2 = await client.GetAsync("/api/Notifications/?userId=5").ConfigureAwait(false);
-            var getContent2 = await getResponse2.Content.ReadAsStringAsync().ConfigureAwait(false);
-            var getResult2 = JsonSerializer.Deserialize<NotificationModel[]>(getContent2, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            Assert.Equal(HttpStatusCode.OK, getResponse2.StatusCode);
-            Assert.Empty(getResult2);
+            NotificationEntity notificationEntity2 = new(Guid.NewGuid(),
+                                                         EventType.AppointmentCancelled,
+                                                         EventBody.Create("body2").Value,
+                                                         EventTitle.Create("Title2").Value,
+                                                         1);
 
-            // Post an event and verify that the resulting notification is returned and saved
+            NotificationEntity notificationEntity3 = new(Guid.NewGuid(),
+                                                         EventType.AppointmentCancelled,
+                                                         EventBody.Create("body3").Value,
+                                                         EventTitle.Create("Title3").Value,
+                                                         2);
+            context.Notifications.RemoveRange(context.Notifications);
+
+            context.Notifications.Add(notificationEntity1);
+            context.Notifications.Add(notificationEntity2);
+            context.Notifications.Add(notificationEntity3);
+            context.SaveChanges();
+
+            // Act
+            var response = await client.GetAsync("/api/Notifications/?userId=5").ConfigureAwait(false);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var result = await response.GetObjectFromContentString<NotificationModel[]>();
+            Assert.Empty(result);
+        }
+
+        [Fact]
+        public async void When_Get_AllNotifications_Where_Exist_Expect_AllNotificationsReturned()
+        {
+            // Arrange
+            NotificationEntity notificationEntity1 = new(Guid.NewGuid(),
+                                                         EventType.AppointmentCancelled,
+                                                         EventBody.Create("body1").Value,
+                                                         EventTitle.Create("Title1").Value,
+                                                         1);
+
+            NotificationEntity notificationEntity2 = new(Guid.NewGuid(),
+                                                         EventType.AppointmentCancelled,
+                                                         EventBody.Create("body2").Value,
+                                                         EventTitle.Create("Title2").Value,
+                                                         1);
+
+            NotificationEntity notificationEntity3 = new(Guid.NewGuid(),
+                                                         EventType.AppointmentCancelled,
+                                                         EventBody.Create("body3").Value,
+                                                         EventTitle.Create("Title3").Value,
+                                                         2);
+            context.Notifications.RemoveRange(context.Notifications);
+
+            context.Notifications.Add(notificationEntity1);
+            context.Notifications.Add(notificationEntity2);
+            context.Notifications.Add(notificationEntity3);
+            context.SaveChanges();
+
+            // Act
+            var response = await client.GetAsync("/api/Notifications").ConfigureAwait(false);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var result = await response.GetObjectFromContentString<NotificationModel[]>();
+            Assert.Equal(3, result.Length);
+            NotificationModel notificationModel1 = result.Single(x => x.Id == notificationEntity1.Id);
+            NotificationModel notificationModel2 = result.Single(x => x.Id == notificationEntity2.Id);
+            NotificationModel notificationModel3 = result.Single(x => x.Id == notificationEntity3.Id);
+
+            Assert.Equal(notificationEntity1.EventType.ToString(), notificationModel1.EventType);
+            Assert.Equal(notificationEntity1.Body.Value, notificationModel1.Body);
+            Assert.Equal(notificationEntity1.Title.Value, notificationModel1.Title);
+            Assert.Equal(notificationEntity1.UserId, notificationModel1.UserId);
+
+            Assert.Equal(notificationEntity2.EventType.ToString(), notificationModel2.EventType);
+            Assert.Equal(notificationEntity2.Body.Value, notificationModel2.Body);
+            Assert.Equal(notificationEntity2.Title.Value, notificationModel2.Title);
+            Assert.Equal(notificationEntity2.UserId, notificationModel2.UserId);
+
+            Assert.Equal(notificationEntity3.EventType.ToString(), notificationModel3.EventType);
+            Assert.Equal(notificationEntity3.Body.Value, notificationModel3.Body);
+            Assert.Equal(notificationEntity3.Title.Value, notificationModel3.Title);
+            Assert.Equal(notificationEntity3.UserId, notificationModel3.UserId);
+        }
+
+        [Fact]
+        public async void When_Get_NotificationsForUser_Where_Exist_Expect_NotificationsForUserReturned()
+        {
+            // Arrange
+            NotificationEntity notificationEntity1 = new(Guid.NewGuid(),
+                                                         EventType.AppointmentCancelled,
+                                                         EventBody.Create("body1").Value,
+                                                         EventTitle.Create("Title1").Value,
+                                                         1);
+
+            NotificationEntity notificationEntity2 = new(Guid.NewGuid(),
+                                                         EventType.AppointmentCancelled,
+                                                         EventBody.Create("body2").Value,
+                                                         EventTitle.Create("Title2").Value,
+                                                         1);
+
+            NotificationEntity notificationEntity3 = new(Guid.NewGuid(),
+                                                         EventType.AppointmentCancelled,
+                                                         EventBody.Create("body3").Value,
+                                                         EventTitle.Create("Title3").Value,
+                                                         2);
+            context.Notifications.RemoveRange(context.Notifications);
+
+            context.Notifications.Add(notificationEntity1);
+            context.Notifications.Add(notificationEntity2);
+            context.Notifications.Add(notificationEntity3);
+            context.SaveChanges();
+
+            // Act
+            var response = await client.GetAsync("/api/Notifications/?userId=1").ConfigureAwait(false);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var result = await response.GetObjectFromContentString<NotificationModel[]>();
+            Assert.Equal(2, result.Length);
+            NotificationModel notificationModel1 = result.Single(x => x.Id == notificationEntity1.Id);
+            NotificationModel notificationModel2 = result.Single(x => x.Id == notificationEntity2.Id);
+
+            Assert.Equal(notificationEntity1.EventType.ToString(), notificationModel1.EventType);
+            Assert.Equal(notificationEntity1.Body.Value, notificationModel1.Body);
+            Assert.Equal(notificationEntity1.Title.Value, notificationModel1.Title);
+            Assert.Equal(notificationEntity1.UserId, notificationModel1.UserId);
+
+            Assert.Equal(notificationEntity2.EventType.ToString(), notificationModel2.EventType);
+            Assert.Equal(notificationEntity2.Body.Value, notificationModel2.Body);
+            Assert.Equal(notificationEntity2.Title.Value, notificationModel2.Title);
+            Assert.Equal(notificationEntity2.UserId, notificationModel2.UserId);
+        }
+
+        [Fact]
+        public async void When_Post_Event_Expect_NotificationReturned()
+        {
+            // Arrange
+            context.Notifications.RemoveRange(context.Notifications);
+            context.SaveChanges();
+
             EventModel eventModel = new()
             {
                 UserId = 1,
@@ -62,131 +213,39 @@ namespace Notifications.Tests
                     OrganisationName = "Bob's builders"
                 }
             };
-            var postResponse = await client
+
+            NotificationModel expectedResult = new()
+            {
+                UserId = 1,
+                EventType = "AppointmentCancelled",
+                Title = "Appointment Cancelled",
+                Body = "Hi Bob, your appointment with Bob's builders at 10/02/2011 00:00 has been - cancelled for the following reason: Can't make it."
+            };
+
+            // Act
+            var response = await client
                 .PostAsync("/api/Notifications", new StringContent(JsonSerializer.Serialize(eventModel), Encoding.UTF8, "application/json"))
                 .ConfigureAwait(false);
-            var postContent = await postResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
-            var postResult = JsonSerializer.Deserialize<NotificationModel>(postContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            Assert.Equal(HttpStatusCode.OK, postResponse.StatusCode);
-            Assert.Equal(eventModel.Type, postResult.EventType);
-            Assert.Equal("Appointment Cancelled", postResult.Title);
-            Assert.Equal(eventModel.UserId, postResult.UserId);
-            Assert.Equal("Hi Bob, your appointment with Bob's builders at 10/02/2011 00:00 has been - cancelled for the following reason: Can't make it.", postResult.Body);
 
-            NotificationEntity notification = context.Notifications.Find(postResult.Id);
-            Assert.Equal(eventModel.Type, notification.EventType.ToString());
-            Assert.Equal("Appointment Cancelled", notification.Title);
-            Assert.Equal(eventModel.UserId, notification.UserId);
-            Assert.Equal("Hi Bob, your appointment with Bob's builders at 10/02/2011 00:00 has been - cancelled for the following reason: Can't make it.", notification.Body);
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            // Post a second event and verify that the resulting notification is returned and saved
-            EventModel eventModel2 = new()
-            {
-                UserId = 2,
-                Type = "AppointmentCancelled",
-                Data = new EventDataModel
-                {
-                    AppointmentDateTime = new DateTime(2012, 2, 10),
-                    FirstName = "Jim",
-                    Reason = "Can't do it",
-                    OrganisationName = "Jim's builders"
-                }
-            };
-            var postResponse2 = await client
-                .PostAsync("/api/Notifications", new StringContent(JsonSerializer.Serialize(eventModel2), Encoding.UTF8, "application/json"))
-                .ConfigureAwait(false);
-            var postContent2 = await postResponse2.Content.ReadAsStringAsync().ConfigureAwait(false);
-            var postResult2 = JsonSerializer.Deserialize<NotificationModel>(postContent2, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            Assert.Equal(HttpStatusCode.OK, postResponse2.StatusCode);
-            Assert.Equal(eventModel2.Type, postResult2.EventType);
-            Assert.Equal("Appointment Cancelled", postResult2.Title);
-            Assert.Equal(eventModel2.UserId, postResult2.UserId);
-            Assert.Equal("Hi Jim, your appointment with Jim's builders at 10/02/2012 00:00 has been - cancelled for the following reason: Can't do it.", postResult2.Body);
-
-            NotificationEntity notification2 = context.Notifications.Find(postResult2.Id);
-            Assert.Equal(eventModel2.Type, notification2.EventType.ToString());
-            Assert.Equal("Appointment Cancelled", notification2.Title);
-            Assert.Equal(eventModel2.UserId, notification2.UserId);
-            Assert.Equal("Hi Jim, your appointment with Jim's builders at 10/02/2012 00:00 has been - cancelled for the following reason: Can't do it.", notification2.Body);
-
-            // Post a third event and verify that the resulting notification is returned and saved
-            EventModel eventModel3 = new()
-            {
-                UserId = 2,
-                Type = "AppointmentCancelled",
-                Data = new EventDataModel
-                {
-                    AppointmentDateTime = new DateTime(2012, 3, 12, 5, 59, 58),
-                    FirstName = "Doris",
-                    Reason = "Not coming",
-                    OrganisationName = "Doris's builders"
-                }
-            };
-            var postResponse3 = await client
-                .PostAsync("/api/Notifications", new StringContent(JsonSerializer.Serialize(eventModel3), Encoding.UTF8, "application/json"))
-                .ConfigureAwait(false);
-            var postContent3 = await postResponse3.Content.ReadAsStringAsync().ConfigureAwait(false);
-            var postResult3 = JsonSerializer.Deserialize<NotificationModel>(postContent3, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            Assert.Equal(HttpStatusCode.OK, postResponse3.StatusCode);
-            Assert.Equal(eventModel3.Type, postResult3.EventType);
-            Assert.Equal("Appointment Cancelled", postResult3.Title);
-            Assert.Equal(eventModel3.UserId, postResult3.UserId);
-            Assert.Equal("Hi Doris, your appointment with Doris's builders at 12/03/2012 05:59 has been - cancelled for the following reason: Not coming.", postResult3.Body);
-
-            NotificationEntity notification3 = context.Notifications.Find(postResult3.Id);
-            Assert.Equal(eventModel3.Type, notification3.EventType.ToString());
-            Assert.Equal("Appointment Cancelled", notification3.Title);
-            Assert.Equal(eventModel3.UserId, notification3.UserId);
-            Assert.Equal("Hi Doris, your appointment with Doris's builders at 12/03/2012 05:59 has been - cancelled for the following reason: Not coming.", notification3.Body);
-
-            // Verify that there are three notifications returned from the API 
-            var getResponse3 = await client.GetAsync("/api/Notifications").ConfigureAwait(false);
-            var getContent3 = await getResponse3.Content.ReadAsStringAsync().ConfigureAwait(false);
-            var getResult3 = JsonSerializer.Deserialize<NotificationModel[]>(getContent3, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            Assert.Equal(HttpStatusCode.OK, getResponse3.StatusCode);
-            Assert.Equal(3, getResult3.Length);
-
-            // Verify that there are two filtered notifications for userID = 2
-            var getResponse4 = await client.GetAsync("/api/Notifications/?userId=2").ConfigureAwait(false);
-            var getContent4 = await getResponse4.Content.ReadAsStringAsync().ConfigureAwait(false);
-            var getResult4 = JsonSerializer.Deserialize<NotificationModel[]>(getContent4, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            Assert.Equal(HttpStatusCode.OK, getResponse4.StatusCode);
-            Assert.Equal(2, getResult4.Length);
-
-            var jimResult = getResult4.First(x => x.Body.Contains("Jim"));
-            Assert.Equal("Appointment Cancelled", jimResult.Title);
-            Assert.Equal(2, jimResult.UserId);
-            Assert.Equal("Hi Jim, your appointment with Jim's builders at 10/02/2012 00:00 has been - cancelled for the following reason: Can't do it.", jimResult.Body);
-
-            var dorisResult = getResult4.First(x => x.Body.Contains("Doris"));
-            Assert.Equal("Appointment Cancelled", dorisResult.Title);
-            Assert.Equal(2, dorisResult.UserId);
-            Assert.Equal("Hi Doris, your appointment with Doris's builders at 12/03/2012 05:59 has been - cancelled for the following reason: Not coming.", dorisResult.Body);
-
-            // Verify that there are zero filtered notifications for userId = 5
-            var getResponse5 = await client.GetAsync("/api/Notifications/?userId=5").ConfigureAwait(false);
-            var getContent5 = await getResponse5.Content.ReadAsStringAsync().ConfigureAwait(false);
-            var getResult5 = JsonSerializer.Deserialize<NotificationModel[]>(getContent5, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            Assert.Equal(HttpStatusCode.OK, getResponse5.StatusCode);
-            Assert.Empty(getResult5);
+            var result = await response.GetObjectFromContentString<NotificationModel>();
+            Assert.NotEqual(Guid.Empty, result.Id);
+            Assert.Equal(expectedResult, result with { Id = new Guid()});
         }
 
         [Fact]
-        public async void SadPath()
+        public async void When_Post_Event_Expect_NotificationSaved()
         {
-            // Verify that incorrect URL is reported
-            var getResponse = await client.GetAsync("/api/Notification").ConfigureAwait(false);
-            Assert.Equal(HttpStatusCode.NotFound, getResponse.StatusCode);
+            // Arrange
+            context.Notifications.RemoveRange(context.Notifications);
+            context.SaveChanges();
 
-            // Verify that incorrect query arameter name is reported
-            var getResponse2 = await client.GetAsync("/api/Notifications/?usId=5").ConfigureAwait(false);
-            Assert.Equal(HttpStatusCode.OK, getResponse2.StatusCode);
-
-            // Post an event with incorrect Type and verify that it is reported correctly
             EventModel eventModel = new()
             {
                 UserId = 1,
-                Type = "AppointmentFinished",  // Incorrect
+                Type = "AppointmentCancelled",
                 Data = new EventDataModel
                 {
                     AppointmentDateTime = new DateTime(2011, 2, 10),
@@ -195,32 +254,103 @@ namespace Notifications.Tests
                     OrganisationName = "Bob's builders"
                 }
             };
-            var postResponse = await client
+
+            // Act
+            var response = await client
                 .PostAsync("/api/Notifications", new StringContent(JsonSerializer.Serialize(eventModel), Encoding.UTF8, "application/json"))
                 .ConfigureAwait(false);
-            var postContent = await postResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
-            Assert.Equal(HttpStatusCode.BadRequest, postResponse.StatusCode);
-            Assert.Equal("The requested EventType: (AppointmentFinished) was not found.", postContent);
 
-            // Post a second event with type for which no template exists and verify that it is reported correctly
-            EventModel eventModel2 = new()
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            NotificationEntity result = context.Notifications.First();
+            Assert.Equal(1, context.Notifications.Count());
+            Assert.NotEqual(Guid.Empty, result.Id);
+            Assert.Equal(EventType.AppointmentCancelled, result.EventType);
+            Assert.Equal("Appointment Cancelled", result.Title);
+            Assert.Equal(eventModel.UserId, result.UserId);
+            Assert.Equal("Hi Bob, your appointment with Bob's builders at 10/02/2011 00:00 has been - cancelled for the following reason: Can't make it.", result.Body);
+        }
+
+        [Fact]
+        public async void When_Get_IncorrectUrl_Expect_NotFoundReturned()
+        {
+            // Act
+            var response = await client.GetAsync("/api/Notification").ConfigureAwait(false);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        [Fact]
+        public async void When_Get_IncorrectQueryParameter_Expect_BadRequestReturned()
+        {
+            // Act
+            var response = await client.GetAsync("/api/Notifications/?usId=5").ConfigureAwait(false);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+
+            var result = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            Assert.Equal("Bad request - check query parameters", result);
+        }
+
+        [Fact]
+        public async void When_Post_InvalidEventType_Expect_BadRequestReturned()
+        {
+            // Arrange
+            EventModel eventModel = new()
             {
-                UserId = 2,
-                Type = "AppointmentPostponed",  // Valid but no template
+                UserId = 1,
+                Type = "AppointmentFinished",  // Invalid
                 Data = new EventDataModel
                 {
-                    AppointmentDateTime = new DateTime(2012, 2, 10),
-                    FirstName = "Jim",
-                    Reason = "Can't do it",
-                    OrganisationName = "Jim's builders"
+                    AppointmentDateTime = new DateTime(2011, 2, 10),
+                    FirstName = "Bob",
+                    Reason = "Can't make it",
+                    OrganisationName = "Bob's builders"
                 }
             };
-            var postResponse2 = await client
-                .PostAsync("/api/Notifications", new StringContent(JsonSerializer.Serialize(eventModel2), Encoding.UTF8, "application/json"))
+
+            // Act
+            var response = await client
+                .PostAsync("/api/Notifications", new StringContent(JsonSerializer.Serialize(eventModel), Encoding.UTF8, "application/json"))
                 .ConfigureAwait(false);
-            var postContent2 = await postResponse2.Content.ReadAsStringAsync().ConfigureAwait(false);
-            Assert.Equal(HttpStatusCode.BadRequest, postResponse2.StatusCode);
-            Assert.Equal("The requested EventType: (AppointmentPostponed) was not found.", postContent2);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+
+            var result = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            Assert.Equal("The requested EventType: (AppointmentFinished) was not found.", result);
+        }
+
+        [Fact]
+        public async void When_Post_EventTypeMissingTemplate_Expect_BadRequestReturned()
+        {
+            // Arrange
+            EventModel eventModel = new()
+            {
+                UserId = 1,
+                Type = "AppointmentPostponed",  // Invalid
+                Data = new EventDataModel
+                {
+                    AppointmentDateTime = new DateTime(2011, 2, 10),
+                    FirstName = "Bob",
+                    Reason = "Can't make it",
+                    OrganisationName = "Bob's builders"
+                }
+            };
+
+            // Act
+            var response = await client
+                .PostAsync("/api/Notifications", new StringContent(JsonSerializer.Serialize(eventModel), Encoding.UTF8, "application/json"))
+                .ConfigureAwait(false);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+
+            var result = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            Assert.Equal("The requested EventType: (AppointmentPostponed) was not found.", result);
         }
     }
 }
